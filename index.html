@@ -1,0 +1,369 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Kasir By B41M</title>
+  <meta name="description" content="Aplikasi Kasir profesional untuk toko Anda. Kelola produk, transaksi, dan laporan penjualan dengan mudah.">
+  <meta name="theme-color" content="#4f46e5">
+  <link rel="manifest" href="manifest.json">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- Splash Screen -->
+  <div id="splash" class="splash">
+    <div class="splash-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <line x1="6" y1="9" x2="6" y2="9"/>
+        <line x1="10" y1="9" x2="10" y2="9"/>
+        <line x1="6" y1="13" x2="6" y2="13"/>
+        <line x1="10" y1="13" x2="10" y2="13"/>
+        <line x1="14" y1="9" x2="18" y2="9"/>
+        <line x1="14" y1="13" x2="18" y2="13"/>
+      </svg>
+    </div>
+    <h1>Kasir By B41M</h1>
+    <div class="spinner"></div>
+  </div>
+
+  <!-- App Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <h1>Kasir By B41M</h1>
+      <span class="header-date" id="currentDate"></span>
+    </div>
+    <div class="header-right">
+      <span class="status-badge" id="statusBadge">
+        <span class="status-dot"></span>
+        <span id="statusText">Online</span>
+      </span>
+      <button class="icon-btn" id="btnSync" title="Sinkronkan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M23 4v6h-6M1 20v-6h6"/>
+          <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+        </svg>
+      </button>
+      <button class="icon-btn" id="btnSettings" title="Pengaturan">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="12" r="3"/>
+          <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    <!-- POS View -->
+    <section id="view-pos" class="view active">
+      <div class="pos-layout">
+        <!-- Product Catalog -->
+        <div class="catalog">
+          <div class="catalog-header">
+            <div class="search-box">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="8"/>
+                <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+              </svg>
+              <input type="text" id="searchInput" placeholder="Cari produk...">
+            </div>
+            <button class="btn-category active" data-cat="all">Semua</button>
+            <div class="category-list" id="categoryList"></div>
+          </div>
+          <div class="product-grid" id="productGrid"></div>
+        </div>
+
+        <!-- Cart -->
+        <div class="cart">
+          <div class="cart-header">
+            <h2>Pesanan</h2>
+            <span class="cart-count" id="cartCount">0 item</span>
+          </div>
+          <div class="cart-items" id="cartItems"></div>
+          <div class="cart-footer">
+            <div class="total-row">
+              <span>Subtotal</span>
+              <span id="subtotal">Rp 0</span>
+            </div>
+            <div class="total-row grand">
+              <span>Total</span>
+              <span id="grandTotal">Rp 0</span>
+            </div>
+            <button class="btn-primary" id="btnCheckout">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 12h14M12 5l7 7-7 7"/>
+              </svg>
+              Bayar Sekarang
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Products View -->
+    <section id="view-products" class="view">
+      <div class="view-header">
+        <h2>Manajemen Produk</h2>
+        <button class="btn-primary" id="btnAddProduct">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="12" y1="5" x2="12" y2="19"/>
+            <line x1="5" y1="12" x2="19" y2="12"/>
+          </svg>
+          Tambah Produk
+        </button>
+      </div>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Produk</th>
+              <th>Kategori</th>
+              <th>Harga</th>
+              <th>Stok</th>
+              <th>Aksi</th>
+            </tr>
+          </thead>
+          <tbody id="productsTableBody"></tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- History View -->
+    <section id="view-history" class="view">
+      <div class="view-header">
+        <h2>Riwayat Transaksi</h2>
+        <div class="history-filter">
+          <input type="date" id="filterDate">
+          <button class="btn-secondary" id="btnExport">Export</button>
+        </div>
+      </div>
+      <div class="history-list" id="historyList"></div>
+    </section>
+
+    <!-- Settings View -->
+    <section id="view-settings" class="view">
+      <div class="view-header">
+        <h2>Pengaturan</h2>
+      </div>
+      <div class="settings-body">
+        <div class="settings-section">
+          <h3>Informasi Toko</h3>
+          <div class="form-group">
+            <label>Nama Toko</label>
+            <input type="text" id="storeName" placeholder="Nama toko Anda">
+          </div>
+          <div class="form-group">
+            <label>Alamat</label>
+            <input type="text" id="storeAddress" placeholder="Alamat toko">
+          </div>
+          <div class="form-group">
+            <label>Telepon</label>
+            <input type="text" id="storePhone" placeholder="No. telepon">
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>Pengaturan Transaksi</h3>
+          <div class="form-group">
+            <label>Pajak (%)</label>
+            <input type="number" id="taxRate" placeholder="0" min="0" max="100">
+          </div>
+          <div class="form-group">
+            <label>Pajak Berlaku</label>
+            <div class="toggle-row">
+              <span>Terapkan pajak pada transaksi</span>
+              <label class="switch">
+                <input type="checkbox" id="taxEnabled">
+                <span class="slider"></span>
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="settings-section">
+          <h3>Data</h3>
+          <div class="settings-actions">
+            <button class="btn-danger" id="btnResetData">Reset Semua Data</button>
+            <button class="btn-secondary" id="btnExportData">Export Data (JSON)</button>
+            <button class="btn-secondary" id="btnImportData">Import Data (JSON)</button>
+            <input type="file" id="importFile" accept=".json" style="display:none">
+          </div>
+        </div>
+        <button class="btn-primary" id="btnSaveSettings">Simpan Pengaturan</button>
+      </div>
+    </section>
+  </main>
+
+  <!-- Bottom Navigation -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" data-view="pos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <rect x="2" y="5" width="20" height="14" rx="2"/>
+        <line x1="6" y1="9" x2="6" y2="9"/>
+        <line x1="10" y1="9" x2="10" y2="9"/>
+        <line x1="6" y1="13" x2="6" y2="13"/>
+        <line x1="10" y1="13" x2="10" y2="13"/>
+        <line x1="14" y1="9" x2="18" y2="9"/>
+        <line x1="14" y1="13" x2="18" y2="13"/>
+      </svg>
+      <span>Kasir</span>
+    </button>
+    <button class="nav-item" data-view="products">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+        <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+        <line x1="12" y1="22.08" x2="12" y2="12"/>
+      </svg>
+      <span>Produk</span>
+    </button>
+    <button class="nav-item" data-view="history">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 3v5h5"/>
+        <path d="M3.05 13A9 9 0 1 0 6 5.3L3 8"/>
+        <path d="M12 7v5l4 2"/>
+      </svg>
+      <span>Riwayat</span>
+    </button>
+    <button class="nav-item" data-view="settings">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+      </svg>
+      <span>Pengaturan</span>
+    </button>
+  </nav>
+
+  <!-- Checkout Modal -->
+  <div class="modal-overlay" id="checkoutModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2>Pembayaran</h2>
+        <button class="modal-close" id="closeCheckout">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="checkout-summary">
+          <div class="total-row">
+            <span>Total</span>
+            <span id="checkoutTotal" class="big-total">Rp 0</span>
+          </div>
+          <div class="total-row" id="checkoutTaxRow">
+            <span>Pajak (10%)</span>
+            <span id="checkoutTax">Rp 0</span>
+          </div>
+        </div>
+        <div class="payment-methods">
+          <button class="payment-method active" data-method="cash">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="6" width="20" height="12" rx="2"/>
+              <circle cx="12" cy="12" r="2"/>
+              <path d="M6 12h.01M18 12h.01"/>
+            </svg>
+            Tunai
+          </button>
+          <button class="payment-method" data-method="qris">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="3" y="3" width="7" height="7"/>
+              <rect x="14" y="3" width="7" height="7"/>
+              <rect x="3" y="14" width="7" height="7"/>
+              <rect x="14" y="14" width="7" height="7"/>
+            </svg>
+            QRIS
+          </button>
+          <button class="payment-method" data-method="transfer">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M17 20h4v-4M21 4L4 20M4 4h4v4"/>
+            </svg>
+            Transfer
+          </button>
+        </div>
+        <div class="form-group" id="cashInputGroup">
+          <label>Uang Diterima</label>
+          <input type="number" id="cashReceived" placeholder="Masukkan uang tunai">
+        </div>
+        <div class="total-row change-row">
+          <span>Kembalian</span>
+          <span id="changeAmount">Rp 0</span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="btnConfirmPayment">Selesaikan Pembayaran</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Product Modal -->
+  <div class="modal-overlay" id="productModal">
+    <div class="modal">
+      <div class="modal-header">
+        <h2 id="productModalTitle">Tambah Produk</h2>
+        <button class="modal-close" id="closeProductModal">&times;</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="productId">
+        <div class="form-group">
+          <label>Nama Produk</label>
+          <input type="text" id="productName" placeholder="Nama produk">
+        </div>
+        <div class="form-group">
+          <label>Kategori</label>
+          <select id="productCategory">
+            <option value="Makanan">Makanan</option>
+            <option value="Minuman">Minuman</option>
+            <option value="Snack">Snack</option>
+            <option value="Lainnya">Lainnya</option>
+          </select>
+        </div>
+        <div class="form-row">
+          <div class="form-group">
+            <label>Harga</label>
+            <input type="number" id="productPrice" placeholder="0">
+          </div>
+          <div class="form-group">
+            <label>Stok</label>
+            <input type="number" id="productStock" placeholder="0">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>Emoji / Ikon</label>
+          <input type="text" id="productEmoji" placeholder="🍔">
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-primary" id="btnSaveProduct">Simpan Produk</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Receipt Modal -->
+  <div class="modal-overlay" id="receiptModal">
+    <div class="modal receipt">
+      <div class="modal-header">
+        <h2>Struk Pembayaran</h2>
+        <button class="modal-close" id="closeReceipt">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="receipt-content" id="receiptContent"></div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-secondary" id="btnPrintReceipt">Print</button>
+        <button class="btn-primary" id="btnNewTransaction">Transaksi Baru</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+  // ===== REGISTER SERVICE WORKER (PWA) =====
+  if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+      navigator.serviceWorker.register('./sw.js')
+        .then(reg => console.log('Service Worker terdaftar:', reg.scope))
+        .catch(err => console.error('Gagal register Service Worker:', err));
+    });
+  }
+  </script>
+  <script src="app.js"></script>
+</body>
+</html>
