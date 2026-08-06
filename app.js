@@ -17,7 +17,8 @@ let state = {
   },
   cart: [],
   currentCategory: 'all',
-  searchTerm: ''
+  searchTerm: '',
+  productSearchTerm: ''
 };
 
 const STORAGE_KEYS = {
@@ -176,16 +177,16 @@ async function requestPersistentStorage() {
 
 function seedProducts() {
   state.products = [
-    { id: 'p1', name: 'Nasi Goreng', category: 'Makanan', price: 15000, stock: 50, emoji: '🍛' },
-    { id: 'p2', name: 'Mie Goreng', category: 'Makanan', price: 12000, stock: 40, emoji: '🍜' },
-    { id: 'p3', name: 'Ayam Geprek', category: 'Makanan', price: 18000, stock: 30, emoji: '🍗' },
-    { id: 'p4', name: 'Es Teh Manis', category: 'Minuman', price: 5000, stock: 100, emoji: '🧋' },
-    { id: 'p5', name: 'Es Jeruk', category: 'Minuman', price: 6000, stock: 80, emoji: '🍊' },
-    { id: 'p6', name: 'Kopi Susu', category: 'Minuman', price: 12000, stock: 60, emoji: '☕' },
-    { id: 'p7', name: 'Keripik Kentang', category: 'Snack', price: 8000, stock: 45, emoji: '🍟' },
-    { id: 'p8', name: 'Roti Bakar', category: 'Snack', price: 10000, stock: 25, emoji: '🍞' },
-    { id: 'p9', name: 'Air Mineral', category: 'Minuman', price: 4000, stock: 120, emoji: '💧' },
-    { id: 'p10', name: 'Pisang Goreng', category: 'Makanan', price: 7000, stock: 35, emoji: '🍌' }
+    { id: 'p1', name: 'Beras Premium 5kg', category: 'Sembako', price: 75000, stock: 30, emoji: '🍚' },
+    { id: 'p2', name: 'Minyak Goreng 1L', category: 'Sembako', price: 18000, stock: 40, emoji: '🫗' },
+    { id: 'p3', name: 'Telur Ayam 1kg', category: 'Sembako', price: 28000, stock: 25, emoji: '🥚' },
+    { id: 'p4', name: 'Gula Pasir 1kg', category: 'Sembako', price: 17000, stock: 50, emoji: '🍬' },
+    { id: 'p5', name: 'Tepung Terigu 1kg', category: 'Sembako', price: 12000, stock: 35, emoji: '🥣' },
+    { id: 'p6', name: 'Mie Instan', category: 'Sembako', price: 3500, stock: 100, emoji: '🍜' },
+    { id: 'p7', name: 'Kopi Bubuk', category: 'Sembako', price: 15000, stock: 30, emoji: '☕' },
+    { id: 'p8', name: 'Susu Kental Manis', category: 'Sembako', price: 12000, stock: 40, emoji: '🥛' },
+    { id: 'p9', name: 'Bawang Merah', category: 'Sembako', price: 30000, stock: 20, emoji: '🧅' },
+    { id: 'p10', name: 'Bawang Putih', category: 'Sembako', price: 35000, stock: 20, emoji: '🧄' }
   ];
   saveData();
 }
@@ -493,12 +494,27 @@ function renderReceipt(tx) {
 // ===== PRODUCTS MANAGEMENT =====
 function renderProductsTable() {
   const tbody = $('productsTableBody');
+  const term = (state.productSearchTerm || '').toLowerCase();
+
+  let products = state.products;
+  if (term) {
+    products = products.filter(p =>
+      (p.name || '').toLowerCase().includes(term) ||
+      (p.category || '').toLowerCase().includes(term)
+    );
+  }
+
   if (state.products.length === 0) {
     tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:30px">Belum ada produk</td></tr>';
     return;
   }
 
-  tbody.innerHTML = state.products.map(p => {
+  if (products.length === 0) {
+    tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--text-light);padding:30px">Tidak ada produk ditemukan</td></tr>';
+    return;
+  }
+
+  tbody.innerHTML = products.map(p => {
     const stockClass = p.stock <= 0 ? 'out' : (p.stock <= 10 ? 'low' : '');
     return `
       <tr>
@@ -523,16 +539,45 @@ function renderProductsTable() {
 }
 
 let editingProductId = null;
+let selectedEmoji = '🍚';
+
+const EMOJI_LIST = [
+  '🍚', '🌾', '🥣', '🌽', '🥔', '🫘', '🥜', '🥥',
+  '🫛', '🥦', '🥬', '🥕', '🧅', '🧄', '🌶️', '🍅',
+  '🥒', '🍋', '🍊', '🍎', '🍌', '🍉', '🥭', '🍇',
+  '🥚', '🍳', '🧈', '🧀', '🥛', '🍼', '🍶', '🧂',
+  '🍯', '🍬', '🍫', '🍭', '🍮', '🍩', '🍪', '🍞',
+  '🥖', '🥐', '🥞', '🍜', '🍝', '🍗', '🥩', '🍤',
+  '🐟', '🐔', '🦐', '🦀', '☕', '🍵', '🥤', '🧃',
+  '💧', '🧴', '🧼', '🧻', '🧽', '🪥', '🛒', '🧺',
+  '📦', '🧾', '🏷️', '💰', '🪙', '💳'
+];
+
+function renderEmojiPicker(selected) {
+  const picker = $('emojiPicker');
+  picker.innerHTML = EMOJI_LIST.map(em => `
+    <button type="button" class="emoji-option ${em === selected ? 'active' : ''}" data-emoji="${em}" onclick="selectEmoji(this)">
+      ${em}
+    </button>
+  `).join('');
+}
+
+function selectEmoji(el) {
+  selectedEmoji = el.dataset.emoji;
+  document.querySelectorAll('.emoji-option').forEach(o => o.classList.remove('active'));
+  el.classList.add('active');
+}
 
 function openAddProduct() {
   editingProductId = null;
+  selectedEmoji = '🍚';
   $('productModalTitle').textContent = 'Tambah Produk';
   $('productId').value = '';
   $('productName').value = '';
-  $('productCategory').value = 'Makanan';
+  $('productCategory').value = 'Sembako';
   $('productPrice').value = '';
   $('productStock').value = '';
-  $('productEmoji').value = '🍔';
+  renderEmojiPicker(selectedEmoji);
   showModal('productModal');
 }
 
@@ -540,13 +585,14 @@ function openEditProduct(id) {
   const product = state.products.find(p => p.id === id);
   if (!product) return;
   editingProductId = id;
+  selectedEmoji = product.emoji || '🍔';
   $('productModalTitle').textContent = 'Edit Produk';
   $('productId').value = product.id;
   $('productName').value = product.name;
   $('productCategory').value = product.category;
   $('productPrice').value = product.price;
   $('productStock').value = product.stock;
-  $('productEmoji').value = product.emoji;
+  renderEmojiPicker(selectedEmoji);
   showModal('productModal');
 }
 
@@ -555,7 +601,7 @@ function saveProduct() {
   const category = $('productCategory').value;
   const price = parseFloat($('productPrice').value) || 0;
   const stock = parseInt($('productStock').value) || 0;
-  const emoji = $('productEmoji').value.trim() || '📦';
+  const emoji = selectedEmoji || '📦';
 
   if (!name) {
     showToast('Nama produk wajib diisi!', 'error');
@@ -636,7 +682,7 @@ function renderHistory() {
     const date = new Date(tx.date);
     const itemsSummary = tx.items.map(i => `${i.name} x${i.qty}`).join(', ');
     return `
-      <div class="history-card">
+      <div class="history-card" onclick="viewReceipt('${tx.id}')">
         <div class="history-card-header">
           <span class="history-id">${tx.id}</span>
           <span class="history-date">${date.toLocaleDateString('id-ID')} ${date.toLocaleTimeString('id-ID')}</span>
@@ -646,9 +692,21 @@ function renderHistory() {
           <span class="history-total">${formatCurrency(tx.total)}</span>
           <span class="history-method">${tx.paymentMethod}</span>
         </div>
+        <div class="history-view-receipt">👉 Ketuk untuk lihat struk</div>
       </div>
     `;
   }).join('');
+}
+
+// ===== VIEW RECEIPT (STRUK) =====
+function viewReceipt(id) {
+  const tx = state.transactions.find(t => t.id === id);
+  if (!tx) {
+    showToast('Transaksi tidak ditemukan', 'error');
+    return;
+  }
+  renderReceipt(tx);
+  showModal('receiptModal');
 }
 
 // ===== SETTINGS =====
@@ -866,7 +924,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
   setTimeout(hideSplash, 2500); // fallback jika loadData lambat
 
-setupInstall();
+  setupInstall();
   updateDate();
   setupNetworkStatus();
 
@@ -887,6 +945,12 @@ setupInstall();
   $('searchInput').addEventListener('input', (e) => {
     state.searchTerm = e.target.value;
     renderProductGrid();
+  });
+
+  // ===== SEARCH PRODUK (MANAJEMEN PRODUK) =====
+  $('productSearchInput').addEventListener('input', (e) => {
+    state.productSearchTerm = e.target.value;
+    renderProductsTable();
   });
 
   // ===== NAVIGATION =====
@@ -934,7 +998,7 @@ setupInstall();
   // ===== HISTORY EXPORT =====
   $('btnExport').addEventListener('click', exportTransactions);
 
-// ===== SYNC =====
+  // ===== SYNC =====
   $('btnSync').addEventListener('click', async () => {
     await saveData();
     showToast('Data tersimpan aman & offline', 'success');

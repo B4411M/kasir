@@ -114,6 +114,15 @@
           Tambah Produk
         </button>
       </div>
+      <div class="product-search">
+        <div class="search-box">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"/>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+          </svg>
+          <input type="text" id="productSearchInput" placeholder="Cari produk...">
+        </div>
+      </div>
       <div class="table-container">
         <table class="data-table">
           <thead>
@@ -307,6 +316,7 @@
         <div class="form-group">
           <label>Kategori</label>
           <select id="productCategory">
+            <option value="Sembako">Sembako</option>
             <option value="Makanan">Makanan</option>
             <option value="Minuman">Minuman</option>
             <option value="Snack">Snack</option>
@@ -324,8 +334,8 @@
           </div>
         </div>
         <div class="form-group">
-          <label>Emoji / Ikon</label>
-          <input type="text" id="productEmoji" placeholder="🍔">
+          <label>Pilih Ikon Produk</label>
+          <div class="emoji-picker" id="emojiPicker"></div>
         </div>
       </div>
       <div class="modal-footer">
