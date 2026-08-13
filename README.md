@@ -1,4 +1,4 @@
-# 🧾 Kasir Pro — Aplikasi Kasir (PWA)
+# 🧾 Kasir Pro — Aplikasi Kasir
 
 Aplikasi **Kasir / Point of Sale (POS)** yang profesional, ringan, dan **bisa diinstall di Android melalui Chrome**. Data tersimpan **offline** di perangkat (LocalStorage) — tidak butuh server/database.
 
