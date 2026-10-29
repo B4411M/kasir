@@ -1,0 +1,18 @@
+{
+  "name": "kasir-by-b41m",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "build:web": "esbuild printer-bridge-entry.js --bundle --format=iife --target=es2017 --outfile=printer-bridge.js && node scripts/copy-web-assets.mjs",
+    "android:sync": "npm run build:web && cap sync android",
+    "android:open": "cap open android"
+  },
+  "dependencies": {
+    "@capacitor/android": "6.2.3",
+    "@capacitor/core": "6.2.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "6.2.3",
+    "esbuild": "0.24.2"
+  }
+}

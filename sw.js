@@ -6,12 +6,13 @@
    - Semua request penting di-cache
    ============================================ */
 
-const CACHE_NAME = 'kasir-pro-v3';
+const CACHE_NAME = 'kasir-pro-v4';
 const APP_SHELL = [
   './',
   './index.html',
   './style.css',
   './app.js',
+  './printer-bridge.js',
   './manifest.json',
   './icons/icon-192.png',
   './icons/icon-512.png',

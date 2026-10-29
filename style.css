@@ -853,6 +853,26 @@ button {
   font-weight: 600;
 }
 
+.printer-controls[hidden],
+.printer-web-controls[hidden] {
+  display: none !important;
+}
+
+.printer-status {
+  margin-top: 10px;
+  color: var(--text-light);
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.printer-controls .btn-primary,
+.printer-controls .btn-secondary {
+  width: auto;
+  flex: 1 1 130px;
+  padding: 10px 12px;
+  font-size: 13px;
+}
+
 .form-group {
   margin-bottom: 12px;
 }

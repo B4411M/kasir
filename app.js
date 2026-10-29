@@ -455,7 +455,11 @@ function confirmPayment() {
 }
 
 // ===== RECEIPT =====
+let currentReceiptTransaction = null;
+let connectedPrinterAddress = null;
+
 function renderReceipt(tx) {
+  currentReceiptTransaction = tx;
   const store = state.settings;
   const html = `
     <div class="receipt-header">
@@ -491,9 +495,49 @@ function renderReceipt(tx) {
   $('receiptContent').innerHTML = html;
 }
 
-function printTestReceipt() {
+function formatReceiptForPrinter(tx) {
+  const store = state.settings;
+  const itemLines = tx.items.flatMap(item => [
+    item.name,
+    `${item.qty} x ${formatCurrency(item.price)}  ${formatCurrency(item.price * item.qty)}`
+  ]);
+  const lines = [
+    store.storeName || 'Toko Saya',
+    store.storeAddress,
+    store.storePhone ? `Tel: ${store.storePhone}` : '',
+    `${new Date(tx.date).toLocaleDateString('id-ID')} ${new Date(tx.date).toLocaleTimeString('id-ID')}`,
+    tx.id,
+    '--------------------------------',
+    ...itemLines,
+    '--------------------------------',
+    `Subtotal: ${formatCurrency(tx.subtotal)}`,
+    tx.tax > 0 ? `Pajak: ${formatCurrency(tx.tax)}` : '',
+    `TOTAL: ${formatCurrency(tx.total)}`,
+    `Pembayaran ${tx.paymentMethod.toUpperCase()}: ${formatCurrency(tx.cashReceived)}`,
+    `Kembalian: ${formatCurrency(tx.change)}`,
+    '',
+    'Terima kasih atas kunjungan Anda!'
+  ];
+  return lines.filter(line => line !== '').join('\n') + '\n';
+}
+
+async function printReceiptDirectly(tx) {
+  if (!connectedPrinterAddress) {
+    showToast('Hubungkan printer di Pengaturan terlebih dahulu', 'error');
+    switchView('settings');
+    return;
+  }
+  try {
+    await window.KasirPrinter.print(formatReceiptForPrinter(tx));
+    showToast('Struk dikirim ke printer', 'success');
+  } catch (error) {
+    showToast(error.message || 'Gagal mencetak struk', 'error');
+  }
+}
+
+async function printTestReceipt() {
   const now = new Date();
-  renderReceipt({
+  const testReceipt = {
     id: 'TES-PRINTER',
     date: now.toISOString(),
     items: [{ name: 'Tes cetak', qty: 1, price: 1000, emoji: '🧾' }],
@@ -503,9 +547,98 @@ function printTestReceipt() {
     paymentMethod: 'tes',
     cashReceived: 1000,
     change: 0
-  });
+  };
+
+  if (window.KasirPrinter?.isNative) {
+    await printReceiptDirectly(testReceipt);
+    return;
+  }
+
+  renderReceipt(testReceipt);
   showModal('receiptModal');
   window.print();
+}
+
+async function loadPairedPrinters() {
+  const select = $('printerDevice');
+  const status = $('printerStatus');
+  status.textContent = 'Memuat perangkat Bluetooth...';
+  try {
+    const result = await window.KasirPrinter.getPairedDevices();
+    const devices = result.devices || [];
+    const savedAddress = localStorage.getItem('kasirpro_printer_address');
+    select.replaceChildren();
+    const placeholder = document.createElement('option');
+    placeholder.value = '';
+    placeholder.textContent = 'Pilih printer';
+    select.append(placeholder);
+    devices.forEach(device => {
+      const option = document.createElement('option');
+      option.value = device.address;
+      option.textContent = `${device.name} (${device.address})`;
+      select.append(option);
+    });
+    if (devices.some(device => device.address === savedAddress)) {
+      select.value = savedAddress;
+    }
+    status.textContent = devices.length
+      ? 'Pilih MP-58A1, lalu tekan Hubungkan Printer.'
+      : 'Belum ada printer dipasangkan. Pasangkan melalui Bluetooth Android.';
+  } catch (error) {
+    status.textContent = error.message || 'Tidak dapat memuat perangkat Bluetooth.';
+  }
+}
+
+function setupPrinterSettings() {
+  const isNative = Boolean(window.KasirPrinter?.isNative);
+  $('nativePrinterControls').hidden = !isNative;
+  $('webPrinterControls').hidden = isNative;
+  if (!isNative) return;
+
+  $('btnOpenPrinterSettings').addEventListener('click', async () => {
+    try {
+      await window.KasirPrinter.openBluetoothSettings();
+      $('printerStatus').textContent = 'Pasangkan MP-58A1 di Android, kembali ke aplikasi, lalu tekan Muat Perangkat.';
+    } catch (error) {
+      showToast(error.message || 'Pengaturan Bluetooth tidak dapat dibuka', 'error');
+    }
+  });
+  $('btnRefreshPrinters').addEventListener('click', loadPairedPrinters);
+  $('btnConnectPrinter').addEventListener('click', async () => {
+    const address = $('printerDevice').value;
+    if (!address) {
+      showToast('Pilih printer yang sudah dipasangkan', 'error');
+      return;
+    }
+    $('printerStatus').textContent = 'Menghubungkan ke printer...';
+    try {
+      const device = await window.KasirPrinter.connect(address);
+      connectedPrinterAddress = device.address;
+      localStorage.setItem('kasirpro_printer_address', device.address);
+      $('printerStatus').textContent = `${device.name} terhubung`;
+      $('btnTestPrinter').disabled = false;
+      $('btnDisconnectPrinter').disabled = false;
+      showToast('Printer berhasil terhubung', 'success');
+    } catch (error) {
+      connectedPrinterAddress = null;
+      $('printerStatus').textContent = error.message || 'Gagal menghubungkan printer.';
+      $('btnTestPrinter').disabled = true;
+      showToast($('printerStatus').textContent, 'error');
+    }
+  });
+  $('btnDisconnectPrinter').addEventListener('click', async () => {
+    try {
+      await window.KasirPrinter.disconnect();
+      connectedPrinterAddress = null;
+      $('printerStatus').textContent = 'Printer terputus';
+      $('btnTestPrinter').disabled = true;
+      $('btnDisconnectPrinter').disabled = true;
+    } catch (error) {
+      showToast(error.message || 'Gagal memutus printer', 'error');
+    }
+  });
+  $('btnTestPrinter').addEventListener('click', printTestReceipt);
+  loadPairedPrinters();
 }
 
 // ===== PRODUCTS MANAGEMENT =====
@@ -942,6 +1075,7 @@ document.addEventListener('DOMContentLoaded', () => {
   setTimeout(hideSplash, 2500); // fallback jika loadData lambat
 
   setupInstall();
+  setupPrinterSettings();
   updateDate();
   setupNetworkStatus();
 
@@ -994,8 +1128,13 @@ document.addEventListener('DOMContentLoaded', () => {
     renderProductGrid();
   });
   $('btnPrintReceipt').addEventListener('click', () => {
-    window.print();
+    if (window.KasirPrinter?.isNative) {
+      printReceiptDirectly(currentReceiptTransaction);
+    } else {
+      window.print();
+    }
   });
+  $('btnBrowserTestPrint').addEventListener('click', printTestReceipt);
 
   // ===== PRODUCT MODAL =====
   $('btnAddProduct').addEventListener('click', openAddProduct);

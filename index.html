@@ -191,10 +191,28 @@
         </div>
         <div class="settings-section">
           <h3>Printer Struk</h3>
-          <p class="printer-help">Pasangkan MP-58A1 melalui Bluetooth Android. Setelah itu, pilih printer di dialog cetak.</p>
-          <div class="printer-actions">
-            <span class="printer-paper">Kertas 58 mm</span>
-            <button class="btn-secondary" id="btnConnectPrinter" type="button">Pilih Printer &amp; Tes Cetak</button>
+          <p class="printer-help" id="printerHelp">Kertas 58 mm. Hubungkan printer untuk cetak langsung dari aplikasi.</p>
+          <div id="nativePrinterControls" class="printer-controls" hidden>
+            <div class="printer-actions">
+              <button class="btn-secondary" id="btnOpenPrinterSettings" type="button">Pasangkan Bluetooth</button>
+              <button class="btn-secondary" id="btnRefreshPrinters" type="button">Muat Perangkat</button>
+            </div>
+            <div class="form-group">
+              <label for="printerDevice">Printer yang sudah dipasangkan</label>
+              <select id="printerDevice">
+                <option value="">Pilih printer</option>
+              </select>
+            </div>
+            <div class="printer-actions">
+              <button class="btn-primary" id="btnConnectPrinter" type="button">Hubungkan Printer</button>
+              <button class="btn-secondary" id="btnTestPrinter" type="button" disabled>Tes Cetak</button>
+              <button class="btn-secondary" id="btnDisconnectPrinter" type="button" disabled>Putuskan</button>
+            </div>
+            <p class="printer-status" id="printerStatus" role="status" aria-live="polite">Belum terhubung</p>
+          </div>
+          <div id="webPrinterControls" class="printer-web-controls">
+            <p class="printer-help">Di browser, pencetakan memakai dialog cetak sistem.</p>
+            <button class="btn-secondary" id="btnBrowserTestPrint" type="button">Tes Cetak via Dialog</button>
           </div>
         </div>
         <div class="settings-section">
@@ -382,6 +400,7 @@
     });
   }
   </script>
+  <script src="printer-bridge.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

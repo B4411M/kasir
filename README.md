@@ -53,6 +53,18 @@ Lalu buka `http://localhost:8080`.
 4. Atau, akan muncul banner **"Install Kasir Pro"** — ketuk **Install**.
 5. Aplikasi kini terinstall dan bisa dibuka **full screen** tanpa browser.
 
+### 4. APK Android dengan Cetak Bluetooth Langsung
+
+PWA yang dibuka di Chrome tetap menggunakan dialog cetak Android. Untuk menghubungkan printer Bluetooth Classic/SPP langsung dari menu aplikasi, gunakan APK Android:
+
+1. Siapkan Node.js 18+, JDK 17+, Android SDK Platform 34, dan Android Build Tools.
+2. Jalankan `npm install` lalu `npm run android:sync` dari folder proyek.
+3. Jalankan `cd android && ./gradlew assembleDebug`.
+4. APK debug tersedia di `android/app/build/outputs/apk/debug/app-debug.apk`.
+5. Pasangkan MP-58A1 di pengaturan Bluetooth Android. Di APK, buka **Pengaturan → Printer Struk**, tekan **Muat Perangkat**, pilih MP-58A1, lalu **Hubungkan Printer**.
+
+Tombol **Tes Cetak** mengirim struk ESC/POS langsung melalui Bluetooth SPP. Dukungan ini memerlukan printer yang menyediakan layanan SPP standar; pairing Bluetooth saja tidak memastikan protokol printer kompatibel.
+
 ---
 
 ## 🗂️ Struktur File
