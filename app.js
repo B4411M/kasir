@@ -1021,22 +1021,63 @@ document.addEventListener('DOMContentLoaded', () => {
 const printStyle = document.createElement('style');
 printStyle.textContent = `
   @media print {
+    @page {
+      size: 58mm auto;
+      margin: 0;
+    }
+
+    html, body {
+      width: 58mm;
+      min-width: 58mm;
+      height: auto;
+      min-height: 0;
+      margin: 0 !important;
+      padding: 0 !important;
+      overflow: visible !important;
+      background: white;
+    }
+
     body * { visibility: hidden; }
     #receiptModal.show, #receiptModal.show * { visibility: visible; }
     #receiptModal.show {
       display: block;
       position: absolute;
       left: 0; top: 0;
-      width: 100%;
+      width: 58mm;
+      height: auto;
+      margin: 0;
+      padding: 0;
       background: white;
       overflow: visible;
     }
     #receiptModal.show .modal {
-      max-width: 100%;
+      width: 58mm;
+      min-width: 58mm;
+      max-width: 58mm;
+      max-height: none;
       border-radius: 0;
       box-shadow: none;
       height: auto;
       overflow: visible;
+    }
+    #receiptModal.show .modal-body {
+      padding: 0;
+      overflow: visible;
+    }
+    #receiptModal.show .receipt-content {
+      width: 58mm;
+      margin: 0;
+      padding: 2mm;
+      border: 0;
+      border-radius: 0;
+      overflow: visible;
+      break-inside: avoid;
+      page-break-inside: avoid;
+    }
+    #receiptModal.show .receipt-item,
+    #receiptModal.show .receipt-row {
+      break-inside: avoid;
+      page-break-inside: avoid;
     }
     #receiptModal.show .modal-header,
     #receiptModal.show .modal-footer,
