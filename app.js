@@ -491,6 +491,23 @@ function renderReceipt(tx) {
   $('receiptContent').innerHTML = html;
 }
 
+function printTestReceipt() {
+  const now = new Date();
+  renderReceipt({
+    id: 'TES-PRINTER',
+    date: now.toISOString(),
+    items: [{ name: 'Tes cetak', qty: 1, price: 1000, emoji: '🧾' }],
+    subtotal: 1000,
+    tax: 0,
+    total: 1000,
+    paymentMethod: 'tes',
+    cashReceived: 1000,
+    change: 0
+  });
+  showModal('receiptModal');
+  window.print();
+}
+
 // ===== PRODUCTS MANAGEMENT =====
 function renderProductsTable() {
   const tbody = $('productsTableBody');
@@ -987,6 +1004,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // ===== SETTINGS =====
   $('btnSaveSettings').addEventListener('click', saveSettings);
+  $('btnConnectPrinter').addEventListener('click', printTestReceipt);
   $('btnResetData').addEventListener('click', resetAllData);
   $('btnExportData').addEventListener('click', exportData);
   $('btnImportData').addEventListener('click', () => $('importFile').click());
